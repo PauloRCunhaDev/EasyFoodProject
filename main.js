@@ -114,3 +114,23 @@ function adicionarAoCarrinho(nome, preco) {
 
     document.getElementById('total-carrinho').textContent = total.toFixed(2);
 }
+
+//funcionalidade do botão de finalizar compra
+document.addEventListener('DOMContentLoaded', function() {
+    const btnFinalizar = document.getElementById('btn-finalizar');
+
+    btnFinalizar.addEventListener('click', function() {
+        if (carrinhoItens.length === 0) {
+            alert("Seu carrinho está vazio!");
+            return;
+        }
+
+        alert("Compra realizada com sucesso! Obrigado por usar o EasyFood 🍽️");
+
+        // Limpa carrinho
+        carrinhoItens = [];
+        total = 0;
+        document.getElementById('lista-carrinho').innerHTML = '';
+        document.getElementById('total-carrinho').textContent = '0.00';
+    });
+});

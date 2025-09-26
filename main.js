@@ -8,20 +8,24 @@ const restaurantes = [
 
 const itensPorRestaurante = {
     "bar do filha": [
-        { nome: "Cerveja gelada", preco: 8.00 },
-        { nome: "Porção de calabresa", preco: 18.00 }
+        { nome: "Cerveja gelada", preco: 8.00, esgotado: false },
+        { nome: "Porção de calabresa", preco: 18.00, esgotado: false },
+        { nome: "Batata frita", preco: 12.00, esgotado: true }
     ],
     "churras do ligeiro": [
-        { nome: "Espetinho de carne", preco: 10.00 },
-        { nome: "Refrigerante", preco: 5.00 }
+        { nome: "Espetinho de carne", preco: 10.00, esgotado: false },
+        { nome: "Refrigerante", preco: 5.00, esgotado: false },
+        { nome: "Espetinho de frango", preco: 9.00, esgotado: true }
     ],
     "lanche do lucas": [
-        { nome: "X-Tudo", preco: 20.00 },
-        { nome: "Suco de laranja", preco: 6.00 }
+        { nome: "X-Tudo", preco: 20.00, esgotado: false },
+        { nome: "Suco de laranja", preco: 6.00, esgotado: false },
+        { nome: "X-Salada", preco: 15.00, esgotado: true }
     ],
     "pizzaria do follmann": [
-        { nome: "Pizza de frango com catupiry", preco: 30.00 },
-        { nome: "Pizza de calabresa", preco: 28.00 }
+        { nome: "Pizza de frango com catupiry", preco: 30.00, esgotado: false },
+        { nome: "Pizza de calabresa", preco: 28.00, esgotado: false },
+        { nome: "Pizza de margherita", preco: 25.00, esgotado: true }
     ]
 };
 
@@ -90,12 +94,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         itens.forEach(item => {
             const div = document.createElement('div');
-            div.className = 'restaurante-card';
-            div.innerHTML = `
-                <h3>${item.nome}</h3>
-                <p>Preço: R$ ${item.preco.toFixed(2)}</p>
-                <button class="btn-selecionar" onclick="adicionarAoCarrinho('${item.nome}', ${item.preco})">Adicionar ao carrinho</button>
-            `;
+            div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
+            
+            if (item.esgotado) {
+                div.innerHTML = `
+                    <h3>${item.nome} <span style="color: red; font-size: 14px;">(ESGOTADO)</span></h3>
+                    <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+                    <button class="btn-selecionar btn-esgotado" onclick="itemEsgotado('${item.nome}')">Não disponível</button>
+                `;
+            } else {
+                div.innerHTML = `
+                    <h3>${item.nome}</h3>
+                    <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+                    <button class="btn-selecionar" onclick="adicionarAoCarrinho('${item.nome}', ${item.preco})">Adicionar ao carrinho</button>
+                `;
+            }
             listaItens.appendChild(div);
         });
 
@@ -113,6 +126,10 @@ function adicionarAoCarrinho(nome, preco) {
     document.getElementById('lista-carrinho').appendChild(li);
 
     document.getElementById('total-carrinho').textContent = total.toFixed(2);
+}
+
+function itemEsgotado(nome) {
+    alert(`Desculpe! O item "${nome}" está esgotado e não pode ser adicionado ao carrinho.`);
 }
 
 //funcionalidade do botão de finalizar compra

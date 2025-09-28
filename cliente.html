@@ -11,18 +11,27 @@
         <h1>
             EasyFood
         </h1>
-        
-        <div class="search-bar">
-            <input type="text" placeholder="Digite o nome do restaurante" class="search-input">
-            <button class="search-button">🔍</button>
+
+        <!-- NavBar de Clientes -->
+        <div class="tab-buttons">
+            <button onclick="showTab('buscar')">🔍 Buscar Restaurantes</button>
+            <button onclick="showTab('pedidos')">📦 Meus Pedidos</button>
         </div>
         
-        <div id="resultado-busca" class="resultado-container" style="display: none;">
-            <div class="restaurante-card">
-                <h3 id="nome-restaurante"></h3>
-                <button class="btn-selecionar">Selecionar</button>
+        <!-- Aba: Buscar Restaurante -->
+        <div id="buscar" class="tab active">
+            <div class="search-bar">
+                <input type="text" placeholder="Digite o nome do restaurante" class="search-input">
+                <button class="search-button">🔍</button>
+            </div>
+            <div id="resultado-busca" class="resultado-container" style="display: none;">
+                <div class="restaurante-card">
+                    <h3 id="nome-restaurante"></h3>
+                    <button class="btn-selecionar">Selecionar</button>
+                </div>
             </div>
         </div>
+
     </center>
 
     <!-- Itens do restaurante -->
@@ -38,6 +47,15 @@
         <p><strong>Total:</strong> R$ <span id="total-carrinho">0.00</span></p>
         <button id="btn-finalizar" class="btn-selecionar">Finalizar Compra</button>
     </div>
+
+    <!-- Aba: Meus Pedidos -->
+    <div id="pedidos" class="tab">
+        <div class="resultado-container">
+            <h2>📦 Meus Pedidos</h2>
+            <div id="pedidos-cliente"></div>
+        </div>
+    </div>
+
     <script src="main.js"></script>
 </body>
 </html>

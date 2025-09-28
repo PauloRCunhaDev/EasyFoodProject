@@ -107,3 +107,28 @@ h1 {
 .item-esgotado h3 {
     color: #666;
 }
+
+.tab {
+    display: none;
+}
+.tab.active {
+    display: block;
+}
+.tab-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.tab-buttons button {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #1d2eea;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+}
+.tab-buttons button:hover {
+    background-color: #1420b8;
+}

@@ -6,6 +6,7 @@ const restaurantes = [
     "pizzaria do follmann"
 ];
 
+// lista de itens do restaurante
 const itensPorRestaurante = {
     "bar do filha": [
         { nome: "Cerveja gelada", preco: 8.00, esgotado: false },
@@ -29,6 +30,8 @@ const itensPorRestaurante = {
     ]
 };
 
+// lista dos pedidos, carrinho e valor total
+let pedidos = [];
 let carrinhoItens = [];
 let total = 0;
 
@@ -90,8 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const listaItens = document.getElementById('lista-itens');
-        listaItens.innerHTML = ''; // limpa antes de mostrar
+        listaItens.innerHTML = ''; // Limpa antes de mostrar
 
+        // Identificar se um item está esgotado
         itens.forEach(item => {
             const div = document.createElement('div');
             div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
@@ -117,7 +121,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Funcionalidade para adicionar ao carrinho
 function adicionarAoCarrinho(nome, preco) {
+    // Adiciona o item a lista do pedido e soma o preço
     carrinhoItens.push({ nome, preco });
     total += preco;
 
@@ -128,6 +134,7 @@ function adicionarAoCarrinho(nome, preco) {
     document.getElementById('total-carrinho').textContent = total.toFixed(2);
 }
 
+// alerta sobre o item esgotado
 function itemEsgotado(nome) {
     alert(`Desculpe! O item "${nome}" está esgotado e não pode ser adicionado ao carrinho.`);
 }
@@ -137,10 +144,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnFinalizar = document.getElementById('btn-finalizar');
 
     btnFinalizar.addEventListener('click', function() {
+        // Identifica se o carrinho está vazio
         if (carrinhoItens.length === 0) {
             alert("Seu carrinho está vazio!");
             return;
         }
+        
+        const nomeRestaurante = document.getElementById('nome-restaurante').textContent;
+
+        // Cria um objeto com as informações do restaurante e do pedido
+        const novoPedido = {
+            restaurante: nomeRestaurante,
+            status: "Preparando",
+            itens: carrinhoItens.map(item => ({ nome: item.nome, preco: item.preco }))
+        };
+
+        // Adicionado o pedido a lista
+        pedidos.push(novoPedido);
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
 
         alert("Compra realizada com sucesso! Obrigado por usar o EasyFood 🍽️");
 
@@ -150,4 +171,116 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('lista-carrinho').innerHTML = '';
         document.getElementById('total-carrinho').textContent = '0.00';
     });
+
 });
+
+// Função para exibir o pedido do Cliente
+function exibirPedidosCliente() {
+    const container = document.getElementById('pedidos-cliente');
+    if (!container) return;
+
+    container.innerHTML = ''; // limpa a area dos pedidos para não repetir
+
+    // Busca os pedidos e tranforma em objeto
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (pedidosSalvos) {
+        pedidos = JSON.parse(pedidosSalvos);
+    }
+
+    if (pedidos.length === 0) {
+        container.innerHTML = '<p>Você ainda não realizou nenhum pedido.</p>';
+        return;
+    }
+
+    // Display de exibição de cada pedido
+    pedidos.forEach((pedido, index) => {
+        const div = document.createElement('div');
+        div.className = 'restaurante-card';
+        div.innerHTML = `<h3>Pedido #${index + 1}</h3><h4>Restaurante - ${pedido.restaurante}</h4><ul>` +
+            pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('') +
+            `</ul><p>Status: Aguardando retirada</p>`;
+        container.appendChild(div);
+    });
+}
+
+// Função para exibir pedidos no restaurante
+function exibirPedidosRestaurante() {
+    const container = document.getElementById('pedidos-restaurante');
+    if (!container) return;
+
+    // Busca os pedidos e tranforma em objeto
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (pedidosSalvos) {
+        pedidos = JSON.parse(pedidosSalvos);
+    }
+
+    if (pedidos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido recebido ainda.</p>';
+        return;
+    }
+
+    // Display de exibição de cada pedido
+    pedidos.forEach((pedido, index) => {
+        const div = document.createElement('div');
+        div.className = 'restaurante-card';
+        div.innerHTML = `<h3>Pedido #${index + 1}</h3><ul>` +
+            pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('') +
+            `</ul><p>Status: Aguardando retirada</p>`;
+        container.appendChild(div);
+    });
+}
+
+// Função para exibir pedidos no entregador
+function exibirPedidosEntregador() {
+    const container = document.getElementById('pedidos-entregador');
+    if (!container) return;
+
+    // Busca os pedidos e tranforma em objeto
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (pedidosSalvos) {
+        pedidos = JSON.parse(pedidosSalvos);
+    }
+
+    if (pedidos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido disponível para entrega.</p>';
+        return;
+    }
+
+    // Display de exibição de cada pedido
+    pedidos.forEach((pedido, index) => {
+        const div = document.createElement('div');
+        div.className = 'restaurante-card';
+        div.innerHTML = `<h3>Entrega #${index + 1}</h3><ul>` +
+            pedido.itens.map(item => `<li>${item.nome}</li>`).join('') +
+            `</ul><p>Status: Aguardando retirada</p>`;
+        container.appendChild(div);
+    });
+}
+
+// Executa a função correta dependendo da página
+document.addEventListener('DOMContentLoaded', function() {
+    exibirPedidosCliente();
+    exibirPedidosRestaurante();
+    exibirPedidosEntregador();
+});
+
+// Exibi as informações de cada aba
+function showTab(tabId) {
+    // Garante que apenas uma aba seja visivel
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.getElementById(tabId).classList.add('active');
+
+    // Esconde elementos extras da aba de busca
+    if (tabId !== 'buscar') {
+        document.getElementById('resultado-busca').style.display = 'none';
+        document.getElementById('itens-restaurante').style.display = 'none';
+        document.getElementById('carrinho').style.display = 'none';
+    }
+
+    // Atualiza os pedidos se a aba "pedidos" for ativada
+    if (tabId === 'pedidos') {
+        exibirPedidosCliente();
+    }
+}

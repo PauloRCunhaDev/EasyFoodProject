@@ -196,9 +196,13 @@ function exibirPedidosCliente() {
     pedidos.forEach((pedido, index) => {
         const div = document.createElement('div');
         div.className = 'restaurante-card';
-        div.innerHTML = `<h3>Pedido #${index + 1}</h3><h4>Restaurante - ${pedido.restaurante}</h4><ul>` +
-            pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('') +
-            `</ul><p>Status: Aguardando retirada</p>`;
+        div.innerHTML = `
+            <h3>Pedido #${index + 1}</h3>
+            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
+            <p><strong>Status:</strong> ${pedido.status}</p>
+            <ul>
+                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
+            </ul>`
         container.appendChild(div);
     });
 }
@@ -207,6 +211,8 @@ function exibirPedidosCliente() {
 function exibirPedidosRestaurante() {
     const container = document.getElementById('pedidos-restaurante');
     if (!container) return;
+    
+    container.innerHTML = '';
 
     // Busca os pedidos e tranforma em objeto
     const pedidosSalvos = localStorage.getItem('pedidos');
@@ -223,9 +229,14 @@ function exibirPedidosRestaurante() {
     pedidos.forEach((pedido, index) => {
         const div = document.createElement('div');
         div.className = 'restaurante-card';
-        div.innerHTML = `<h3>Pedido #${index + 1}</h3><ul>` +
-            pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('') +
-            `</ul><p>Status: Aguardando retirada</p>`;
+        div.innerHTML = `
+            <h3>Pedido #${index + 1}</h3>
+            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
+            <p><strong>Status:</strong> ${pedido.status}</p>
+            <ul>
+                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
+            </ul>
+            ${pedido.status === 'Preparando' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Aguardando Retirada</button>` : ''}`;
         container.appendChild(div);
     });
 }
@@ -234,6 +245,8 @@ function exibirPedidosRestaurante() {
 function exibirPedidosEntregador() {
     const container = document.getElementById('pedidos-entregador');
     if (!container) return;
+
+    container.innerHTML = '';
 
     // Busca os pedidos e tranforma em objeto
     const pedidosSalvos = localStorage.getItem('pedidos');
@@ -250,9 +263,14 @@ function exibirPedidosEntregador() {
     pedidos.forEach((pedido, index) => {
         const div = document.createElement('div');
         div.className = 'restaurante-card';
-        div.innerHTML = `<h3>Entrega #${index + 1}</h3><ul>` +
-            pedido.itens.map(item => `<li>${item.nome}</li>`).join('') +
-            `</ul><p>Status: Aguardando retirada</p>`;
+        div.innerHTML = `
+            <h3>Pedido #${index + 1}</h3>
+            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
+            <p><strong>Status:</strong> ${pedido.status}</p>
+            <ul>
+                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
+            </ul>
+            ${pedido.status === 'Aguardando retirada' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Saiu para entrega</button>` : ''}`;
         container.appendChild(div);
     });
 }
@@ -284,3 +302,23 @@ function showTab(tabId) {
         exibirPedidosCliente();
     }
 }
+
+function atualizarStatus(index) {
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (!pedidosSalvos) return;
+
+    const pedidos = JSON.parse(pedidosSalvos);
+    if(pedidos[index].status === "Preparando") {
+        pedidos[index].status = "Aguardando retirada";
+        localStorage.setItem('pedidos','');
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        exibirPedidosRestaurante(); // atualiza a tela
+    } else if(pedidos[index].status === "Aguardando retirada"){
+        pedidos[index].status = "Saiu para entrega";
+        localStorage.setItem('pedidos', '');
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        exibirPedidosEntregador(); // atualiza a tela
+    }
+}
+
+document.addEventListener('DOMContentLoaded', exibirPedidosRestaurante);

@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
         pedidos.push(novoPedido);
         localStorage.setItem('pedidos', JSON.stringify(pedidos));
 
-        alert("Compra realizada com sucesso! Obrigado por usar o EasyFood 🍽️");
+        alert("Compra realizada com sucesso! Obrigado por usar o EasyFood 🍽️\n\nAgora você pode usar o chat para se comunicar com o restaurante e entregador!");
 
         // Limpa carrinho
         carrinhoItens = [];
@@ -209,74 +209,6 @@ function exibirPedidosCliente() {
             <ul>
                 ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
             </ul>`
-        container.appendChild(div);
-    });
-}
-
-// Função para exibir pedidos no restaurante
-function exibirPedidosRestaurante() {
-    const container = document.getElementById('pedidos-restaurante');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    // Busca os pedidos e tranforma em objeto
-    const pedidosSalvos = localStorage.getItem('pedidos');
-    if (pedidosSalvos) {
-        pedidos = JSON.parse(pedidosSalvos);
-    }
-
-    if (pedidos.length === 0) {
-        container.innerHTML = '<p>Nenhum pedido recebido ainda.</p>';
-        return;
-    }
-
-    // Display de exibição de cada pedido
-    pedidos.forEach((pedido, index) => {
-        const div = document.createElement('div');
-        div.className = 'restaurante-card';
-        div.innerHTML = `
-            <h3>Pedido #${index + 1}</h3>
-            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
-            <p><strong>Status:</strong> ${pedido.status}</p>
-            <ul>
-                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
-            </ul>
-            ${pedido.status === 'Preparando' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Aguardando Retirada</button>` : ''}`;
-        container.appendChild(div);
-    });
-}
-
-// Função para exibir pedidos no entregador
-function exibirPedidosEntregador() {
-    const container = document.getElementById('pedidos-entregador');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    // Busca os pedidos e tranforma em objeto
-    const pedidosSalvos = localStorage.getItem('pedidos');
-    if (pedidosSalvos) {
-        pedidos = JSON.parse(pedidosSalvos);
-    }
-
-    if (pedidos.length === 0) {
-        container.innerHTML = '<p>Nenhum pedido disponível para entrega.</p>';
-        return;
-    }
-
-    // Display de exibição de cada pedido
-    pedidos.forEach((pedido, index) => {
-        const div = document.createElement('div');
-        div.className = 'restaurante-card';
-        div.innerHTML = `
-            <h3>Pedido #${index + 1}</h3>
-            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
-            <p><strong>Status:</strong> ${pedido.status}</p>
-            <ul>
-                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
-            </ul>
-            ${pedido.status === 'Aguardando retirada' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Saiu para entrega</button>` : ''}`;
         container.appendChild(div);
     });
 }
@@ -343,24 +275,63 @@ function showTab(tabId) {
 }
 
 function atualizarStatus(index) {
-    const pedidosSalvos = localStorage.getItem('pedidos');
-    if (!pedidosSalvos) return;
+    try {
+        const pedidosSalvos = localStorage.getItem('pedidos');
+        if (!pedidosSalvos) {
+            console.error('Nenhum pedido encontrado no localStorage');
+            return;
+        }
 
-    const pedidos = JSON.parse(pedidosSalvos);
-    if (pedidos[index].status === "Preparando") {
-        pedidos[index].status = "Aguardando retirada";
-        localStorage.setItem('pedidos', '');
+        const pedidos = JSON.parse(pedidosSalvos);
+        
+        // Validar se o índice é válido
+        if (index < 0 || index >= pedidos.length) {
+            console.error('Índice de pedido inválido:', index);
+            alert('Erro: Pedido não encontrado!');
+            return;
+        }
+
+        const pedido = pedidos[index];
+        if (!pedido || !pedido.status) {
+            console.error('Pedido inválido:', pedido);
+            alert('Erro: Dados do pedido inválidos!');
+            return;
+        }
+
+        const statusAnterior = pedido.status;
+        
+        // Atualizar status baseado no estado atual
+        if (pedido.status === "Preparando") {
+            pedido.status = "Aguardando retirada";
+            alert(`Pedido #${index + 1} marcado como "Aguardando retirada"`);
+        } else if (pedido.status === "Aguardando retirada") {
+            pedido.status = "Saiu para entrega";
+            alert(`Pedido #${index + 1} marcado como "Saiu para entrega"`);
+        } else if (pedido.status === "Saiu para entrega") {
+            pedido.status = "Entregue";
+            alert(`Pedido #${index + 1} marcado como "Entregue"!\n\nO chat ficará indisponível se não houver mais pedidos em andamento.`);
+        } else {
+            alert('Este pedido já foi finalizado ou possui status inválido.');
+            return;
+        }
+
+        // Salvar os pedidos atualizados no localStorage
         localStorage.setItem('pedidos', JSON.stringify(pedidos));
-        exibirPedidosRestaurante(); // atualiza a tela
-    } else if (pedidos[index].status === "Aguardando retirada") {
-        pedidos[index].status = "Saiu para entrega";
-        localStorage.setItem('pedidos', '');
-        localStorage.setItem('pedidos', JSON.stringify(pedidos));
-        exibirPedidosEntregador(); // atualiza a tela
+        
+        console.log(`Status do pedido ${index + 1} alterado de "${statusAnterior}" para "${pedido.status}"`);
+        
+        // Atualizar todas as telas relevantes
+        exibirPedidosCliente();
+        exibirPedidosRestaurante();
+        exibirPedidosEntregador();
+        
+        // Verificar se ainda há pedidos em andamento após a atualização
+        verificarExibicaoChat();
+        
+    } catch (error) {
+        console.error('Erro ao atualizar status do pedido:', error);
+        alert('Erro interno ao atualizar status do pedido. Tente novamente.');
     }
-    
-    // Verificar se ainda há pedidos em andamento após a atualização
-    verificarExibicaoChat();
 }
 
 document.addEventListener('DOMContentLoaded', exibirPedidosRestaurante);
@@ -445,11 +416,14 @@ document.addEventListener('DOMContentLoaded', function () {
 // Função para exibir pedidos no restaurante
 function exibirPedidosRestaurante() {
     const container = document.getElementById('pedidos-restaurante');
-    if (!container) return;
+    if (!container) {
+        console.log('Container pedidos-restaurante não encontrado');
+        return;
+    }
 
     container.innerHTML = '';
 
-    // Busca os pedidos e tranforma em objeto
+    // Busca os pedidos e transforma em objeto
     const pedidosSalvos = localStorage.getItem('pedidos');
     if (pedidosSalvos) {
         pedidos = JSON.parse(pedidosSalvos);
@@ -464,6 +438,19 @@ function exibirPedidosRestaurante() {
     pedidos.forEach((pedido, index) => {
         const div = document.createElement('div');
         div.className = 'restaurante-card';
+        
+        let botaoStatus = '';
+        
+        // Mostra botão para atualizar status baseado no status atual
+        if (pedido.status === "Preparando") {
+            botaoStatus = `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Aguardando Retirada</button>`;
+        } else if (pedido.status === "Aguardando retirada") {
+            botaoStatus = `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Saiu para Entrega</button>`;
+        } else if (pedido.status === "Saiu para entrega") {
+            botaoStatus = `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Entregue</button>`;
+        }
+        // Para status "Entregue" não mostra botão
+
         div.innerHTML = `
             <h3>Pedido #${index + 1}</h3>
             <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
@@ -471,7 +458,7 @@ function exibirPedidosRestaurante() {
             <ul>
                 ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
             </ul>
-            ${pedido.status === 'Preparando' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Aguardando Retirada</button>` : ''}`;
+            ${botaoStatus}`;
         container.appendChild(div);
     });
 }
@@ -505,7 +492,8 @@ function exibirPedidosEntregador() {
             <ul>
                 ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
             </ul>
-            ${pedido.status === 'Aguardando retirada' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Saiu para entrega</button>` : ''}`;
+            ${pedido.status === 'Aguardando retirada' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Saiu para entrega</button>` : ''}
+            ${pedido.status === 'Saiu para entrega' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Entregue</button>` : ''}`;
         container.appendChild(div);
     });
 }
@@ -613,20 +601,42 @@ document.addEventListener('DOMContentLoaded', function () {
 // Sistema de Chat
 let mensagensChat = JSON.parse(localStorage.getItem('chatMessages')) || [];
 
-// Função para verificar se existem pedidos em andamento
-function temPedidosEmAndamento() {
-    const pedidosSalvos = localStorage.getItem('pedidos');
-    if (!pedidosSalvos) return false;
-    
-    const pedidos = JSON.parse(pedidosSalvos);
-    return pedidos.some(pedido => 
-        pedido.status === 'Preparando' || 
-        pedido.status === 'Aguardando retirada' || 
-        pedido.status === 'Saiu para entrega'
-    );
+// Função para debugar pedidos (pode ser removida em produção)
+function debugPedidos() {
+    const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+    console.log('=== DEBUG PEDIDOS ===');
+    console.log('Total de pedidos:', pedidos.length);
+    pedidos.forEach((pedido, index) => {
+        console.log(`Pedido ${index + 1}:`, pedido.status, '- Restaurante:', pedido.restaurante);
+    });
+    console.log('Pedidos em andamento:', temPedidosEmAndamento());
+    console.log('====================');
+    return pedidos;
 }
 
-// Função para verificar e exibir/ocultar botão de chat
+// Função para verificar se existem pedidos em andamento
+function temPedidosEmAndamento() {
+    try {
+        const pedidosSalvos = localStorage.getItem('pedidos');
+        if (!pedidosSalvos || pedidosSalvos === '') return false;
+        
+        const pedidos = JSON.parse(pedidosSalvos);
+        if (!Array.isArray(pedidos) || pedidos.length === 0) return false;
+        
+        return pedidos.some(pedido => 
+            pedido && pedido.status && (
+                pedido.status === 'Preparando' || 
+                pedido.status === 'Aguardando retirada' || 
+                pedido.status === 'Saiu para entrega'
+            )
+        );
+    } catch (error) {
+        console.error('Erro ao verificar pedidos em andamento:', error);
+        return false;
+    }
+}
+
+// Função para verificar e atualizar estado dos botões de chat
 function verificarExibicaoChat() {
     const botaoChatCliente = document.querySelector('.tab-buttons button[onclick="showTab(\'chat\')"]');
     const botaoChatRestaurante = document.querySelector('.tab-buttons button[onclick="showTab(\'chat-restaurante\')"]');
@@ -634,14 +644,24 @@ function verificarExibicaoChat() {
     
     const temPedidos = temPedidosEmAndamento();
     
+    // Os botões sempre aparecem, mas ficam desabilitados se não houver pedidos
     if (botaoChatCliente) {
-        botaoChatCliente.style.display = temPedidos ? 'inline-block' : 'none';
+        botaoChatCliente.style.display = 'inline-block';
+        botaoChatCliente.disabled = !temPedidos;
+        botaoChatCliente.style.opacity = temPedidos ? '1' : '0.5';
+        botaoChatCliente.title = temPedidos ? 'Chat disponível' : 'É necessário ter pedidos em andamento para usar o chat';
     }
     if (botaoChatRestaurante) {
-        botaoChatRestaurante.style.display = temPedidos ? 'inline-block' : 'none';
+        botaoChatRestaurante.style.display = 'inline-block';
+        botaoChatRestaurante.disabled = !temPedidos;
+        botaoChatRestaurante.style.opacity = temPedidos ? '1' : '0.5';
+        botaoChatRestaurante.title = temPedidos ? 'Chat disponível' : 'É necessário ter pedidos em andamento para usar o chat';
     }
     if (botaoChatEntregador) {
-        botaoChatEntregador.style.display = temPedidos ? 'inline-block' : 'none';
+        botaoChatEntregador.style.display = 'inline-block';
+        botaoChatEntregador.disabled = !temPedidos;
+        botaoChatEntregador.style.opacity = temPedidos ? '1' : '0.5';
+        botaoChatEntregador.title = temPedidos ? 'Chat disponível' : 'É necessário ter pedidos em andamento para usar o chat';
     }
 }
 
@@ -846,8 +866,13 @@ function exibirMensagensEntregador() {
 
 // Event listeners para o chat
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('🚀 EasyFood - Sistema inicializado');
+    
     // Verificar exibição do chat quando a página carregar
     verificarExibicaoChat();
+    
+    // Debug inicial dos pedidos
+    debugPedidos();
     
     // Cliente
     const chatSendBtn = document.getElementById('chat-send');

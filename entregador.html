@@ -7,9 +7,33 @@
 </head>
 <body>
     <center>
-        <h1>Pedidos para Entrega</h1>
-        <div id="pedidos-entregador" class="resultado-container">
-            <!-- Lista de pedidos aparece aqui -->
+        <h1>EasyFood - Entregador</h1>
+        
+        <!-- NavBar do Entregador -->
+        <div class="tab-buttons">
+            <button onclick="showTab('entregas-entregador')">📦 Pedidos para Entrega</button>
+            <button onclick="showTab('chat-entregador')">💬 Chat</button>
+        </div>
+        
+        <!-- Aba: Pedidos para Entrega -->
+        <div id="entregas-entregador" class="tab active">
+            <div id="pedidos-entregador" class="resultado-container">
+                <!-- Lista de pedidos aparece aqui -->
+            </div>
+        </div>
+        
+        <!-- Aba: Chat -->
+        <div id="chat-entregador" class="tab">
+            <div class="resultado-container">
+                <h2>💬 Chat com Clientes</h2>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages-entregador"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input-entregador" class="chat-input" placeholder="Responder ao cliente...">
+                        <button id="chat-send-entregador" class="chat-send-btn">Enviar</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </center>
     <script src="main.js"></script>

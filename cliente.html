@@ -16,6 +16,7 @@
         <div class="tab-buttons">
             <button onclick="showTab('buscar')">🔍 Buscar Restaurantes</button>
             <button onclick="showTab('pedidos')">📦 Meus Pedidos</button>
+            <button onclick="showTab('chat')">💬 Chat</button>
         </div>
         
         <!-- Aba: Buscar Restaurante -->
@@ -53,6 +54,25 @@
         <div class="resultado-container">
             <h2>📦 Meus Pedidos</h2>
             <div id="pedidos-cliente"></div>
+        </div>
+    </div>
+
+    <!-- Aba: Chat -->
+    <div id="chat" class="tab">
+        <div class="resultado-container">
+            <h2>💬 Chat</h2>
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-container">
+                    <select id="chat-destinatario" class="chat-select">
+                        <option value="">Selecione o destinatário</option>
+                        <option value="restaurante">Restaurante</option>
+                        <option value="entregador">Entregador</option>
+                    </select>
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Digite sua mensagem...">
+                    <button id="chat-send" class="chat-send-btn">Enviar</button>
+                </div>
+            </div>
         </div>
     </div>
 

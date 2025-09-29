@@ -304,3 +304,53 @@ h1 {
     font-style: italic;
     padding: 50px;
 }
+
+/* Estilos para seção de itens pendentes */
+.secao-pendentes {
+    border-top: 2px dashed #ea1d2c;
+    padding-top: 20px;
+    margin-top: 30px;
+}
+
+.secao-pendentes h3 {
+    color: #ea1d2c;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.lista-itens-pendentes {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding-right: 10px;
+}
+
+.lista-itens-pendentes::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-itens-pendentes::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.lista-itens-pendentes::-webkit-scrollbar-thumb {
+    background: #ea1d2c;
+    border-radius: 10px;
+}
+
+.lista-itens-pendentes::-webkit-scrollbar-thumb:hover {
+    background: #d01625;
+}
+
+.secao-pendentes .restaurante-card {
+    background-color: #fff3cd !important;
+    border-color: #ffeaa7 !important;
+    margin-bottom: 10px;
+}
+
+.secao-pendentes .btn-selecionar {
+    float: right;
+    margin-top: 15px;
+    clear: both;
+}

@@ -35,6 +35,9 @@ let pedidos = [];
 let carrinhoItens = [];
 let total = 0;
 
+// lista de itens pendentes para adicionar ao menu (por restaurante)
+let itensPendentes = {};
+
 // Função para buscar restaurante
 function buscarRestaurante() {
     const input = document.querySelector('.search-input');
@@ -405,20 +408,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Verifica se o item já existe
+            // Verifica se o item já existe no menu principal
             const itensExistentes = itensPorRestaurante[nomeRestaurante] || [];
-            const itemDuplicado = itensExistentes.find(item => item.nome.trim().toLowerCase() === nomeItem.toLowerCase());
+            const itemDuplicadoMenu = itensExistentes.find(item => item.nome.trim().toLowerCase() === nomeItem.toLowerCase());
 
-            if (itemDuplicado) {
-                alert(`O item "${itemDuplicado.nome}" já está cadastrado neste restaurante.`);
+            if (itemDuplicadoMenu) {
+                alert(`O item "${itemDuplicadoMenu.nome}" já está no menu deste restaurante.`);
+                return;
+            }
+
+            // Verifica se o item já existe na lista pendente
+            if (!itensPendentes[nomeRestaurante]) {
+                itensPendentes[nomeRestaurante] = [];
+            }
+            
+            const itemDuplicadoPendente = itensPendentes[nomeRestaurante].find(item => item.nome.trim().toLowerCase() === nomeItem.toLowerCase());
+
+            if (itemDuplicadoPendente) {
+                alert(`O item "${itemDuplicadoPendente.nome}" já está na lista para adicionar ao menu.`);
                 return;
             }
 
             const novoItem = { nome: nomeItem, preco: precoItem, esgotado: false };
-            itensExistentes.push(novoItem);
-            itensPorRestaurante[nomeRestaurante] = itensExistentes;
+            itensPendentes[nomeRestaurante].push(novoItem);
 
-            alert(`Item "${nomeItem}" adicionado na lista com sucesso!`);
+            alert(`Item "${nomeItem}" adicionado à lista para adicionar ao menu!`);
             document.getElementById('novo-nome-item').value = '';
             document.getElementById('novo-preco-item').value = '';
         };
@@ -523,24 +537,70 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            nomeRestauranteCardapio.textContent = restauranteEncontrado;
+            nomeRestauranteCardapio.textContent = `Menu: ${restauranteEncontrado}`;
             resultadoCardapio.style.display = 'block';
 
+            // Exibe itens do menu atual
             const itens = itensPorRestaurante[nomeDigitado];
             if (!itens || itens.length === 0) {
                 listaCardapio.innerHTML = '<p>Este restaurante não possui itens cadastrados.</p>';
-                return;
+            } else {
+                itens.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
+                    div.innerHTML = `
+                        <h3>${item.nome} ${item.esgotado ? '<span style="color: red; font-size: 14px;">(ESGOTADO)</span>' : ''}</h3>
+                        <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+                    `;
+                    listaCardapio.appendChild(div);
+                });
             }
 
-            itens.forEach(item => {
-                const div = document.createElement('div');
-                div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
-                div.innerHTML = `
-                    <h3>${item.nome} ${item.esgotado ? '<span style="color: red; font-size: 14px;">(ESGOTADO)</span>' : ''}</h3>
-                    <p>Preço: R$ ${item.preco.toFixed(2)}</p>
-                `;
-                listaCardapio.appendChild(div);
-            });
+            // Exibe seção de itens pendentes para adicionar ao menu
+            const itensPendentesRestaurante = itensPendentes[nomeDigitado];
+            if (itensPendentesRestaurante && itensPendentesRestaurante.length > 0) {
+                const divSecaoPendentes = document.createElement('div');
+                divSecaoPendentes.className = 'secao-pendentes';
+                divSecaoPendentes.style.marginTop = '30px';
+                
+                const tituloPendentes = document.createElement('h3');
+                tituloPendentes.textContent = 'Lista de itens para adicionar ao menu';
+                tituloPendentes.style.color = '#ea1d2c';
+                tituloPendentes.style.marginBottom = '15px';
+                divSecaoPendentes.appendChild(tituloPendentes);
+
+                // Container com scroll para os itens pendentes
+                const containerItens = document.createElement('div');
+                containerItens.className = 'lista-itens-pendentes';
+
+                itensPendentesRestaurante.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'restaurante-card';
+                    div.style.backgroundColor = '#fff3cd';
+                    div.style.borderColor = '#ffeaa7';
+                    div.innerHTML = `
+                        <h3>${item.nome}</h3>
+                        <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+                    `;
+                    containerItens.appendChild(div);
+                });
+
+                divSecaoPendentes.appendChild(containerItens);
+
+                // Botão para adicionar todos os itens ao menu
+                const btnAdicionarAoMenu = document.createElement('button');
+                btnAdicionarAoMenu.textContent = 'Adicionar ao Menu';
+                btnAdicionarAoMenu.className = 'btn-selecionar';
+                btnAdicionarAoMenu.style.float = 'right';
+                btnAdicionarAoMenu.style.marginTop = '15px';
+                
+                btnAdicionarAoMenu.addEventListener('click', function() {
+                    adicionarItensAoMenu(nomeDigitado);
+                });
+
+                divSecaoPendentes.appendChild(btnAdicionarAoMenu);
+                listaCardapio.appendChild(divSecaoPendentes);
+            }
 
             inputCardapio.value = '';
         });
@@ -833,3 +893,53 @@ document.addEventListener('DOMContentLoaded', function () {
     exibirMensagensRestaurante();
     exibirMensagensEntregador();
 });
+
+// Função para adicionar itens pendentes ao menu principal
+function adicionarItensAoMenu(nomeRestaurante) {
+    const itensPendentesRestaurante = itensPendentes[nomeRestaurante];
+    
+    if (!itensPendentesRestaurante || itensPendentesRestaurante.length === 0) {
+        alert('Não há itens pendentes para adicionar ao menu.');
+        return;
+    }
+
+    // Verifica se algum item pendente já existe no menu
+    const itensExistentes = itensPorRestaurante[nomeRestaurante] || [];
+    const itensJaExistem = [];
+    
+    itensPendentesRestaurante.forEach(itemPendente => {
+        const itemDuplicado = itensExistentes.find(item => 
+            item.nome.trim().toLowerCase() === itemPendente.nome.trim().toLowerCase()
+        );
+        if (itemDuplicado) {
+            itensJaExistem.push(itemPendente.nome);
+        }
+    });
+
+    if (itensJaExistem.length > 0) {
+        alert(`Os seguintes itens já estão no menu: ${itensJaExistem.join(', ')}`);
+        // Remove itens duplicados da lista pendente
+        itensPendentes[nomeRestaurante] = itensPendentesRestaurante.filter(itemPendente => 
+            !itensJaExistem.includes(itemPendente.nome)
+        );
+        return;
+    }
+
+    // Adiciona todos os itens pendentes ao menu
+    if (!itensPorRestaurante[nomeRestaurante]) {
+        itensPorRestaurante[nomeRestaurante] = [];
+    }
+    
+    itensPorRestaurante[nomeRestaurante].push(...itensPendentesRestaurante);
+    
+    // Limpa a lista de pendentes
+    itensPendentes[nomeRestaurante] = [];
+    
+    alert(`${itensPendentesRestaurante.length} item(ns) adicionado(s) ao menu com sucesso!`);
+    
+    // Recarrega a visualização do cardápio
+    const btnBuscarCardapio = document.getElementById('search-button-cardapio');
+    if (btnBuscarCardapio) {
+        btnBuscarCardapio.click();
+    }
+}

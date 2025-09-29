@@ -17,13 +17,12 @@
             <button onclick="showTab('entregas')">Pedidos para Entrega</button>
             <button onclick="showTab('novo-item')">Inserir Novo Item</button>
             <button onclick="showTab('ver-cardapio')">Ver Cardápio</button>
-            <button onclick="showTab('chat-restaurante')">💬 Chat</button>
         </div>
 
         <!-- Aba: Pedidos para entrega -->
         <div id="entregas" class="tab active">
-            <div id="pedidos-restaurante" class="resultado-container">
-                <!-- Pedidos do restaurante aparecem aqui -->
+            <div id="pedidos-entregador" class="resultado-container">
+                <!-- Pedidos do entregador aparecem aqui -->
             </div>
         </div>
 
@@ -59,22 +58,8 @@
             </div>
 
             <div id="resultado-cardapio" class="resultado-container" style="display: none;">
-                <h3 id="nome-restaurante-cardapio">menu</h3>
+                <h3 id="nome-restaurante-cardapio"></h3>
                 <div id="lista-cardapio"></div>
-            </div>
-        </div>
-
-        <!-- Aba: Chat -->
-        <div id="chat-restaurante" class="tab">
-            <div class="resultado-container">
-                <h2>💬 Chat com Clientes</h2>
-                <div class="chat-container">
-                    <div class="chat-messages" id="chat-messages-restaurante"></div>
-                    <div class="chat-input-container">
-                        <input type="text" id="chat-input-restaurante" class="chat-input" placeholder="Responder ao cliente...">
-                        <button id="chat-send-restaurante" class="chat-send-btn">Enviar</button>
-                    </div>
-                </div>
             </div>
         </div>
     </center>

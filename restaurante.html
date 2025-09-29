@@ -1,17 +1,68 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
-    <title>EasyFood - Restaurante</title>
+    <title>EasyFood - Gerenciamento</title>
     <link rel="stylesheet" href="style.css">
+    <script src="main.js" defer></script>
 </head>
+
 <body>
     <center>
-        <h1>Pedidos Recebidos</h1>
-        <div id="pedidos-restaurante" class="resultado-container">
-            <!-- Lista de pedidos aparece aqui -->
+        <h1>EasyFood - Área de Gerenciamento</h1>
+
+        <!-- Botões de navegação -->
+        <div class="tab-buttons">
+            <button onclick="showTab('entregas')">Pedidos para Entrega</button>
+            <button onclick="showTab('novo-item')">Inserir Novo Item</button>
+            <button onclick="showTab('ver-cardapio')">Ver Cardápio</button>
+        </div>
+
+        <!-- Aba: Pedidos para entrega -->
+        <div id="entregas" class="tab active">
+            <div id="pedidos-entregador" class="resultado-container">
+                <!-- Pedidos do entregador aparecem aqui -->
+            </div>
+        </div>
+
+        <!-- Aba: Inserir novo item -->
+        <div id="novo-item" class="tab">
+            <div class="search-bar">
+                <input type="text" id="search-input-gerente" placeholder="Digite o nome do restaurante"
+                    class="search-input">
+                <button id="search-button-gerente" class="search-button">🔍</button>
+            </div>
+
+            <div id="resultado-busca-gerente" class="resultado-container" style="display: none;">
+                <div class="restaurante-card">
+                    <h3 id="nome-restaurante-gerente"></h3>
+                    <button id="btn-selecionar-gerente" class="btn-selecionar">Selecionar</button>
+                </div>
+            </div>
+
+            <div id="form-adicionar-item" class="resultado-container" style="display: none;">
+                <h3>Adicionar novo item ao cardápio</h3>
+                <input type="text" id="novo-nome-item" placeholder="Nome do item">
+                <input type="number" id="novo-preco-item" placeholder="Preço (R$)" step="0.01">
+                <button id="btn-adicionar-item" class="btn-selecionar">Salvar item</button>
+            </div>
+        </div>
+
+        <!-- Aba: Ver Cardápio -->
+        <div id="ver-cardapio" class="tab">
+            <div class="search-bar">
+                <input type="text" id="search-input-cardapio" placeholder="Digite o nome do restaurante"
+                    class="search-input">
+                <button id="search-button-cardapio" class="search-button">🔍</button>
+            </div>
+
+            <div id="resultado-cardapio" class="resultado-container" style="display: none;">
+                <h3 id="nome-restaurante-cardapio"></h3>
+                <div id="lista-cardapio"></div>
+            </div>
         </div>
     </center>
-    <script src="main.js"></script>
 </body>
+
 </html>

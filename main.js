@@ -1,7 +1,7 @@
 // "Banco de dados" dos restaurantes
 const restaurantes = [
     "bar do filha",
-    "churras do ligeiro", 
+    "churras do ligeiro",
     "lanche do lucas",
     "pizzaria do follmann"
 ];
@@ -41,21 +41,21 @@ function buscarRestaurante() {
     const resultadoContainer = document.getElementById('resultado-busca');
     const nomeRestauranteElement = document.getElementById('nome-restaurante');
     const nomeDigitado = input.value.trim().toLowerCase();
-    
+
     // Esconde o resultado anterior
     resultadoContainer.style.display = 'none';
-    
+
     // Verifica se o campo não está vazio
     if (nomeDigitado === '') {
         alert('Por favor, digite o nome de um restaurante!');
         return;
     }
-    
+
     // Busca o restaurante no array
-    const restauranteEncontrado = restaurantes.find(restaurante => 
+    const restauranteEncontrado = restaurantes.find(restaurante =>
         restaurante.toLowerCase() === nomeDigitado
     );
-    
+
     if (restauranteEncontrado) {
         // Mostra o restaurante encontrado
         nomeRestauranteElement.textContent = restauranteEncontrado;
@@ -67,26 +67,26 @@ function buscarRestaurante() {
 }
 
 // Adiciona eventos quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchButton = document.querySelector('.search-button');
     const searchInput = document.querySelector('.search-input');
     const btnSelecionar = document.querySelector('.btn-selecionar');
-    
+
     // Buscar ao clicar no botão
     searchButton.addEventListener('click', buscarRestaurante);
-    
+
     // Buscar ao pressionar Enter
-    searchInput.addEventListener('keypress', function(e) {
+    searchInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             buscarRestaurante();
         }
     });
-    
+
     // Funcionalidade do botão selecionar (temporária)
-    btnSelecionar.addEventListener('click', function() {
+    btnSelecionar.addEventListener('click', function () {
         const nomeRestaurante = document.getElementById('nome-restaurante').textContent;
         const itens = itensPorRestaurante[nomeRestaurante.toLowerCase()];
-        
+
         if (!itens) {
             alert("Este restaurante ainda não tem itens cadastrados.");
             return;
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         itens.forEach(item => {
             const div = document.createElement('div');
             div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
-            
+
             if (item.esgotado) {
                 div.innerHTML = `
                     <h3>${item.nome} <span style="color: red; font-size: 14px;">(ESGOTADO)</span></h3>
@@ -140,16 +140,16 @@ function itemEsgotado(nome) {
 }
 
 //funcionalidade do botão de finalizar compra
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const btnFinalizar = document.getElementById('btn-finalizar');
 
-    btnFinalizar.addEventListener('click', function() {
+    btnFinalizar.addEventListener('click', function () {
         // Identifica se o carrinho está vazio
         if (carrinhoItens.length === 0) {
             alert("Seu carrinho está vazio!");
             return;
         }
-        
+
         const nomeRestaurante = document.getElementById('nome-restaurante').textContent;
 
         // Cria um objeto com as informações do restaurante e do pedido
@@ -211,7 +211,7 @@ function exibirPedidosCliente() {
 function exibirPedidosRestaurante() {
     const container = document.getElementById('pedidos-restaurante');
     if (!container) return;
-    
+
     container.innerHTML = '';
 
     // Busca os pedidos e tranforma em objeto
@@ -276,7 +276,7 @@ function exibirPedidosEntregador() {
 }
 
 // Executa a função correta dependendo da página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     exibirPedidosCliente();
     exibirPedidosRestaurante();
     exibirPedidosEntregador();
@@ -308,12 +308,12 @@ function atualizarStatus(index) {
     if (!pedidosSalvos) return;
 
     const pedidos = JSON.parse(pedidosSalvos);
-    if(pedidos[index].status === "Preparando") {
+    if (pedidos[index].status === "Preparando") {
         pedidos[index].status = "Aguardando retirada";
-        localStorage.setItem('pedidos','');
+        localStorage.setItem('pedidos', '');
         localStorage.setItem('pedidos', JSON.stringify(pedidos));
         exibirPedidosRestaurante(); // atualiza a tela
-    } else if(pedidos[index].status === "Aguardando retirada"){
+    } else if (pedidos[index].status === "Aguardando retirada") {
         pedidos[index].status = "Saiu para entrega";
         localStorage.setItem('pedidos', '');
         localStorage.setItem('pedidos', JSON.stringify(pedidos));
@@ -322,3 +322,113 @@ function atualizarStatus(index) {
 }
 
 document.addEventListener('DOMContentLoaded', exibirPedidosRestaurante);
+
+document.addEventListener('DOMContentLoaded', function () {
+    const searchButton = document.getElementById('search-button-gerente');
+    const searchInput = document.getElementById('search-input-gerente');
+    const resultadoContainer = document.getElementById('resultado-busca-gerente');
+    const nomeRestauranteElement = document.getElementById('nome-restaurante-gerente');
+    const btnSelecionar = document.getElementById('btn-selecionar-gerente');
+    const formAdicionar = document.getElementById('form-adicionar-item');
+
+    searchButton.addEventListener('click', function () {
+        const nomeDigitado = searchInput.value.trim().toLowerCase();
+        resultadoContainer.style.display = 'none';
+        formAdicionar.style.display = 'none';
+
+        if (nomeDigitado === '') {
+            alert('Digite o nome de um restaurante!');
+            return;
+        }
+
+        const restauranteEncontrado = restaurantes.find(r => r.toLowerCase() === nomeDigitado);
+
+        if (restauranteEncontrado) {
+            nomeRestauranteElement.textContent = restauranteEncontrado;
+            resultadoContainer.style.display = 'block';
+            searchInput.value = '';
+        } else {
+            alert('Restaurante não encontrado!');
+        }
+    });
+
+    btnSelecionar.addEventListener('click', function () {
+        formAdicionar.style.display = 'block';
+
+        const btnSalvar = document.getElementById('btn-adicionar-item');
+        btnSalvar.onclick = function () {
+            const nomeRestaurante = nomeRestauranteElement.textContent.toLowerCase();
+            const nomeItem = document.getElementById('novo-nome-item').value.trim();
+            const precoItem = parseFloat(document.getElementById('novo-preco-item').value);
+
+            if (!nomeItem || isNaN(precoItem) || precoItem <= 0) {
+                alert("Preencha corretamente o nome e o preço.");
+                return;
+            }
+
+            // Verifica se o item já existe
+            const itensExistentes = itensPorRestaurante[nomeRestaurante] || [];
+            const itemDuplicado = itensExistentes.find(item => item.nome.trim().toLowerCase() === nomeItem.toLowerCase());
+
+            if (itemDuplicado) {
+                alert(`O item "${itemDuplicado.nome}" já está cadastrado neste restaurante.`);
+                return;
+            }
+
+            const novoItem = { nome: nomeItem, preco: precoItem, esgotado: false };
+            itensExistentes.push(novoItem);
+            itensPorRestaurante[nomeRestaurante] = itensExistentes;
+
+            alert(`Item "${nomeItem}" adicionado com sucesso!`);
+            document.getElementById('novo-nome-item').value = '';
+            document.getElementById('novo-preco-item').value = '';
+        };
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btnBuscarCardapio = document.getElementById('search-button-cardapio');
+    const inputCardapio = document.getElementById('search-input-cardapio');
+    const resultadoCardapio = document.getElementById('resultado-cardapio');
+    const nomeRestauranteCardapio = document.getElementById('nome-restaurante-cardapio');
+    const listaCardapio = document.getElementById('lista-cardapio');
+
+    btnBuscarCardapio.addEventListener('click', function () {
+        const nomeDigitado = inputCardapio.value.trim().toLowerCase();
+        resultadoCardapio.style.display = 'none';
+        listaCardapio.innerHTML = '';
+
+        if (nomeDigitado === '') {
+            alert('Digite o nome de um restaurante!');
+            return;
+        }
+
+        const restauranteEncontrado = restaurantes.find(r => r.toLowerCase() === nomeDigitado);
+
+        if (!restauranteEncontrado) {
+            alert('Restaurante não encontrado!');
+            return;
+        }
+
+        nomeRestauranteCardapio.textContent = restauranteEncontrado;
+        resultadoCardapio.style.display = 'block';
+
+        const itens = itensPorRestaurante[nomeDigitado];
+        if (!itens || itens.length === 0) {
+            listaCardapio.innerHTML = '<p>Este restaurante não possui itens cadastrados.</p>';
+            return;
+        }
+
+        itens.forEach(item => {
+            const div = document.createElement('div');
+            div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
+            div.innerHTML = `
+                <h3>${item.nome} ${item.esgotado ? '<span style="color: red; font-size: 14px;">(ESGOTADO)</span>' : ''}</h3>
+                <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+            `;
+            listaCardapio.appendChild(div);
+        });
+
+        inputCardapio.value = '';
+    });
+});

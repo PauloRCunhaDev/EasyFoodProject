@@ -132,3 +132,51 @@ h1 {
 .tab-buttons button:hover {
     background-color: #1420b8;
 }
+
+#form-adicionar-item {
+    background-color: #ffffff;
+    border: 2px dashed #1d2eea;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 30px auto;
+    text-align: center;
+}
+
+#form-adicionar-item h3 {
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    color: #333;
+}
+
+#form-adicionar-item input {
+    width: 90%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+#form-adicionar-item input:focus {
+    border-color: #1d2eea;
+}
+
+#form-adicionar-item button {
+    margin-top: 10px;
+    padding: 10px 25px;
+    background-color: #1d2eea;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#form-adicionar-item button:hover {
+    background-color: #1420b8;
+}

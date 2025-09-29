@@ -170,6 +170,9 @@ document.addEventListener('DOMContentLoaded', function () {
         total = 0;
         document.getElementById('lista-carrinho').innerHTML = '';
         document.getElementById('total-carrinho').textContent = '0.00';
+        
+        // Verificar exibição do chat após novo pedido
+        verificarExibicaoChat();
     });
 
 });
@@ -284,6 +287,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Exibi as informações de cada aba
 function showTab(tabId) {
+    // Verifica se o chat pode ser exibido antes de mostrar a aba
+    if ((tabId === 'chat' || tabId === 'chat-restaurante' || tabId === 'chat-entregador') && !temPedidosEmAndamento()) {
+        alert('É necessário ter pedidos em andamento para acessar o chat!');
+        return;
+    }
+    
     // Garante que apenas uma aba seja visivel
     document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.remove('active');
@@ -292,15 +301,42 @@ function showTab(tabId) {
 
     // Esconde elementos extras da aba de busca
     if (tabId !== 'buscar') {
-        document.getElementById('resultado-busca').style.display = 'none';
-        document.getElementById('itens-restaurante').style.display = 'none';
-        document.getElementById('carrinho').style.display = 'none';
+        const resultadoBusca = document.getElementById('resultado-busca');
+        const itensRestaurante = document.getElementById('itens-restaurante');
+        const carrinho = document.getElementById('carrinho');
+        if (resultadoBusca) resultadoBusca.style.display = 'none';
+        if (itensRestaurante) itensRestaurante.style.display = 'none';
+        if (carrinho) carrinho.style.display = 'none';
     }
 
     // Atualiza os pedidos se a aba "pedidos" for ativada
     if (tabId === 'pedidos') {
         exibirPedidosCliente();
     }
+
+    // Atualiza os pedidos do restaurante se a aba "entregas" for ativada
+    if (tabId === 'entregas') {
+        exibirPedidosRestaurante();
+    }
+
+    // Atualiza os pedidos do entregador se a aba "entregas-entregador" for ativada
+    if (tabId === 'entregas-entregador') {
+        exibirPedidosEntregador();
+    }
+
+    // Atualiza as mensagens do chat quando as abas de chat forem ativadas
+    if (tabId === 'chat') {
+        exibirMensagensCliente();
+    }
+    if (tabId === 'chat-restaurante') {
+        exibirMensagensRestaurante();
+    }
+    if (tabId === 'chat-entregador') {
+        exibirMensagensEntregador();
+    }
+    
+    // Verificar exibição do chat após qualquer mudança de aba
+    verificarExibicaoChat();
 }
 
 function atualizarStatus(index) {
@@ -319,6 +355,9 @@ function atualizarStatus(index) {
         localStorage.setItem('pedidos', JSON.stringify(pedidos));
         exibirPedidosEntregador(); // atualiza a tela
     }
+    
+    // Verificar se ainda há pedidos em andamento após a atualização
+    verificarExibicaoChat();
 }
 
 document.addEventListener('DOMContentLoaded', exibirPedidosRestaurante);
@@ -386,49 +425,411 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Função para exibir pedidos no restaurante
+function exibirPedidosRestaurante() {
+    const container = document.getElementById('pedidos-restaurante');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Busca os pedidos e tranforma em objeto
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (pedidosSalvos) {
+        pedidos = JSON.parse(pedidosSalvos);
+    }
+
+    if (pedidos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido recebido ainda.</p>';
+        return;
+    }
+
+    // Display de exibição de cada pedido
+    pedidos.forEach((pedido, index) => {
+        const div = document.createElement('div');
+        div.className = 'restaurante-card';
+        div.innerHTML = `
+            <h3>Pedido #${index + 1}</h3>
+            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
+            <p><strong>Status:</strong> ${pedido.status}</p>
+            <ul>
+                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
+            </ul>
+            ${pedido.status === 'Preparando' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Aguardando Retirada</button>` : ''}`;
+        container.appendChild(div);
+    });
+}
+
+// Função para exibir pedidos no entregador
+function exibirPedidosEntregador() {
+    const container = document.getElementById('pedidos-entregador');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Busca os pedidos e tranforma em objeto
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (pedidosSalvos) {
+        pedidos = JSON.parse(pedidosSalvos);
+    }
+
+    if (pedidos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido disponível para entrega.</p>';
+        return;
+    }
+
+    // Display de exibição de cada pedido
+    pedidos.forEach((pedido, index) => {
+        const div = document.createElement('div');
+        div.className = 'restaurante-card';
+        div.innerHTML = `
+            <h3>Pedido #${index + 1}</h3>
+            <p><strong>Restaurante:</strong> ${pedido.restaurante}</p>
+            <p><strong>Status:</strong> ${pedido.status}</p>
+            <ul>
+                ${pedido.itens.map(item => `<li>${item.nome} - R$ ${item.preco.toFixed(2)}</li>`).join('')}
+            </ul>
+            ${pedido.status === 'Aguardando retirada' ? `<button onclick="atualizarStatus(${index})" class="btn-selecionar">Marcar como Saiu para entrega</button>` : ''}`;
+        container.appendChild(div);
+    });
+}
+
+// Executa a função correta dependendo da página
 document.addEventListener('DOMContentLoaded', function () {
+    exibirPedidosCliente();
+    exibirPedidosRestaurante();
+    exibirPedidosEntregador();
+    
     const btnBuscarCardapio = document.getElementById('search-button-cardapio');
     const inputCardapio = document.getElementById('search-input-cardapio');
     const resultadoCardapio = document.getElementById('resultado-cardapio');
     const nomeRestauranteCardapio = document.getElementById('nome-restaurante-cardapio');
     const listaCardapio = document.getElementById('lista-cardapio');
 
-    btnBuscarCardapio.addEventListener('click', function () {
-        const nomeDigitado = inputCardapio.value.trim().toLowerCase();
-        resultadoCardapio.style.display = 'none';
-        listaCardapio.innerHTML = '';
+    if (btnBuscarCardapio) {
+        btnBuscarCardapio.addEventListener('click', function () {
+            const nomeDigitado = inputCardapio.value.trim().toLowerCase();
+            resultadoCardapio.style.display = 'none';
+            listaCardapio.innerHTML = '';
 
-        if (nomeDigitado === '') {
-            alert('Digite o nome de um restaurante!');
-            return;
-        }
+            if (nomeDigitado === '') {
+                alert('Digite o nome de um restaurante!');
+                return;
+            }
 
-        const restauranteEncontrado = restaurantes.find(r => r.toLowerCase() === nomeDigitado);
+            const restauranteEncontrado = restaurantes.find(r => r.toLowerCase() === nomeDigitado);
 
-        if (!restauranteEncontrado) {
-            alert('Restaurante não encontrado!');
-            return;
-        }
+            if (!restauranteEncontrado) {
+                alert('Restaurante não encontrado!');
+                return;
+            }
 
-        nomeRestauranteCardapio.textContent = restauranteEncontrado;
-        resultadoCardapio.style.display = 'block';
+            nomeRestauranteCardapio.textContent = restauranteEncontrado;
+            resultadoCardapio.style.display = 'block';
 
-        const itens = itensPorRestaurante[nomeDigitado];
-        if (!itens || itens.length === 0) {
-            listaCardapio.innerHTML = '<p>Este restaurante não possui itens cadastrados.</p>';
-            return;
-        }
+            const itens = itensPorRestaurante[nomeDigitado];
+            if (!itens || itens.length === 0) {
+                listaCardapio.innerHTML = '<p>Este restaurante não possui itens cadastrados.</p>';
+                return;
+            }
 
-        itens.forEach(item => {
-            const div = document.createElement('div');
-            div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
-            div.innerHTML = `
-                <h3>${item.nome} ${item.esgotado ? '<span style="color: red; font-size: 14px;">(ESGOTADO)</span>' : ''}</h3>
-                <p>Preço: R$ ${item.preco.toFixed(2)}</p>
-            `;
-            listaCardapio.appendChild(div);
+            itens.forEach(item => {
+                const div = document.createElement('div');
+                div.className = item.esgotado ? 'restaurante-card item-esgotado' : 'restaurante-card';
+                div.innerHTML = `
+                    <h3>${item.nome} ${item.esgotado ? '<span style="color: red; font-size: 14px;">(ESGOTADO)</span>' : ''}</h3>
+                    <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+                `;
+                listaCardapio.appendChild(div);
+            });
+
+            inputCardapio.value = '';
         });
+    }
+});
 
-        inputCardapio.value = '';
+// Sistema de Chat
+let mensagensChat = JSON.parse(localStorage.getItem('chatMessages')) || [];
+
+// Função para verificar se existem pedidos em andamento
+function temPedidosEmAndamento() {
+    const pedidosSalvos = localStorage.getItem('pedidos');
+    if (!pedidosSalvos) return false;
+    
+    const pedidos = JSON.parse(pedidosSalvos);
+    return pedidos.some(pedido => 
+        pedido.status === 'Preparando' || 
+        pedido.status === 'Aguardando retirada' || 
+        pedido.status === 'Saiu para entrega'
+    );
+}
+
+// Função para verificar e exibir/ocultar botão de chat
+function verificarExibicaoChat() {
+    const botaoChatCliente = document.querySelector('.tab-buttons button[onclick="showTab(\'chat\')"]');
+    const botaoChatRestaurante = document.querySelector('.tab-buttons button[onclick="showTab(\'chat-restaurante\')"]');
+    const botaoChatEntregador = document.querySelector('.tab-buttons button[onclick="showTab(\'chat-entregador\')"]');
+    
+    const temPedidos = temPedidosEmAndamento();
+    
+    if (botaoChatCliente) {
+        botaoChatCliente.style.display = temPedidos ? 'inline-block' : 'none';
+    }
+    if (botaoChatRestaurante) {
+        botaoChatRestaurante.style.display = temPedidos ? 'inline-block' : 'none';
+    }
+    if (botaoChatEntregador) {
+        botaoChatEntregador.style.display = temPedidos ? 'inline-block' : 'none';
+    }
+}
+
+// Função para enviar mensagem (Cliente)
+function enviarMensagemCliente() {
+    if (!temPedidosEmAndamento()) {
+        alert('Você precisa ter um pedido em andamento para usar o chat!');
+        return;
+    }
+
+    const input = document.getElementById('chat-input');
+    const destinatario = document.getElementById('chat-destinatario').value;
+    const mensagem = input.value.trim();
+
+    if (!mensagem) {
+        alert('Digite uma mensagem!');
+        return;
+    }
+
+    if (!destinatario) {
+        alert('Selecione um destinatário!');
+        return;
+    }
+
+    const novaMensagem = {
+        id: Date.now(),
+        remetente: 'cliente',
+        destinatario: destinatario,
+        conteudo: mensagem,
+        timestamp: new Date().toLocaleString('pt-BR')
+    };
+
+    mensagensChat.push(novaMensagem);
+    localStorage.setItem('chatMessages', JSON.stringify(mensagensChat));
+    
+    input.value = '';
+    exibirMensagensCliente();
+}
+
+// Função para enviar mensagem (Restaurante)
+function enviarMensagemRestaurante() {
+    if (!temPedidosEmAndamento()) {
+        alert('Não há pedidos em andamento para responder!');
+        return;
+    }
+
+    const input = document.getElementById('chat-input-restaurante');
+    const mensagem = input.value.trim();
+
+    if (!mensagem) {
+        alert('Digite uma mensagem!');
+        return;
+    }
+
+    const novaMensagem = {
+        id: Date.now(),
+        remetente: 'restaurante',
+        destinatario: 'cliente',
+        conteudo: mensagem,
+        timestamp: new Date().toLocaleString('pt-BR')
+    };
+
+    mensagensChat.push(novaMensagem);
+    localStorage.setItem('chatMessages', JSON.stringify(mensagensChat));
+    
+    input.value = '';
+    exibirMensagensRestaurante();
+}
+
+// Função para enviar mensagem (Entregador)
+function enviarMensagemEntregador() {
+    if (!temPedidosEmAndamento()) {
+        alert('Não há pedidos em andamento para responder!');
+        return;
+    }
+
+    const input = document.getElementById('chat-input-entregador');
+    const mensagem = input.value.trim();
+
+    if (!mensagem) {
+        alert('Digite uma mensagem!');
+        return;
+    }
+
+    const novaMensagem = {
+        id: Date.now(),
+        remetente: 'entregador',
+        destinatario: 'cliente',
+        conteudo: mensagem,
+        timestamp: new Date().toLocaleString('pt-BR')
+    };
+
+    mensagensChat.push(novaMensagem);
+    localStorage.setItem('chatMessages', JSON.stringify(mensagensChat));
+    
+    input.value = '';
+    exibirMensagensEntregador();
+}
+
+// Função para exibir mensagens (Cliente)
+function exibirMensagensCliente() {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    mensagensChat = JSON.parse(localStorage.getItem('chatMessages')) || [];
+    container.innerHTML = '';
+
+    if (!temPedidosEmAndamento()) {
+        container.innerHTML = '<div class="chat-empty">Você precisa ter um pedido em andamento para usar o chat!</div>';
+        return;
+    }
+
+    if (mensagensChat.length === 0) {
+        container.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda. Inicie uma conversa!</div>';
+        return;
+    }
+
+    mensagensChat.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `chat-message ${msg.remetente}`;
+        div.innerHTML = `
+            <div class="chat-message-header">${msg.remetente.toUpperCase()} - ${msg.timestamp}</div>
+            <div class="chat-message-content">${msg.conteudo}</div>
+        `;
+        container.appendChild(div);
     });
+
+    container.scrollTop = container.scrollHeight;
+}
+
+// Função para exibir mensagens (Restaurante)
+function exibirMensagensRestaurante() {
+    const container = document.getElementById('chat-messages-restaurante');
+    if (!container) return;
+
+    mensagensChat = JSON.parse(localStorage.getItem('chatMessages')) || [];
+    container.innerHTML = '';
+
+    if (!temPedidosEmAndamento()) {
+        container.innerHTML = '<div class="chat-empty">Não há pedidos em andamento para responder!</div>';
+        return;
+    }
+
+    const mensagensFiltradas = mensagensChat.filter(msg => 
+        msg.remetente === 'cliente' && msg.destinatario === 'restaurante' || 
+        msg.remetente === 'restaurante'
+    );
+
+    if (mensagensFiltradas.length === 0) {
+        container.innerHTML = '<div class="chat-empty">Nenhuma mensagem de clientes ainda.</div>';
+        return;
+    }
+
+    mensagensFiltradas.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `chat-message ${msg.remetente}`;
+        div.innerHTML = `
+            <div class="chat-message-header">${msg.remetente.toUpperCase()} - ${msg.timestamp}</div>
+            <div class="chat-message-content">${msg.conteudo}</div>
+        `;
+        container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+}
+
+// Função para exibir mensagens (Entregador)
+function exibirMensagensEntregador() {
+    const container = document.getElementById('chat-messages-entregador');
+    if (!container) return;
+
+    mensagensChat = JSON.parse(localStorage.getItem('chatMessages')) || [];
+    container.innerHTML = '';
+
+    if (!temPedidosEmAndamento()) {
+        container.innerHTML = '<div class="chat-empty">Não há pedidos em andamento para responder!</div>';
+        return;
+    }
+
+    const mensagensFiltradas = mensagensChat.filter(msg => 
+        msg.remetente === 'cliente' && msg.destinatario === 'entregador' || 
+        msg.remetente === 'entregador'
+    );
+
+    if (mensagensFiltradas.length === 0) {
+        container.innerHTML = '<div class="chat-empty">Nenhuma mensagem de clientes ainda.</div>';
+        return;
+    }
+
+    mensagensFiltradas.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `chat-message ${msg.remetente}`;
+        div.innerHTML = `
+            <div class="chat-message-header">${msg.remetente.toUpperCase()} - ${msg.timestamp}</div>
+            <div class="chat-message-content">${msg.conteudo}</div>
+        `;
+        container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+}
+
+// Event listeners para o chat
+document.addEventListener('DOMContentLoaded', function () {
+    // Verificar exibição do chat quando a página carregar
+    verificarExibicaoChat();
+    
+    // Cliente
+    const chatSendBtn = document.getElementById('chat-send');
+    const chatInput = document.getElementById('chat-input');
+    if (chatSendBtn) {
+        chatSendBtn.addEventListener('click', enviarMensagemCliente);
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                enviarMensagemCliente();
+            }
+        });
+    }
+
+    // Restaurante
+    const chatSendBtnRestaurante = document.getElementById('chat-send-restaurante');
+    const chatInputRestaurante = document.getElementById('chat-input-restaurante');
+    if (chatSendBtnRestaurante) {
+        chatSendBtnRestaurante.addEventListener('click', enviarMensagemRestaurante);
+    }
+    if (chatInputRestaurante) {
+        chatInputRestaurante.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                enviarMensagemRestaurante();
+            }
+        });
+    }
+
+    // Entregador
+    const chatSendBtnEntregador = document.getElementById('chat-send-entregador');
+    const chatInputEntregador = document.getElementById('chat-input-entregador');
+    if (chatSendBtnEntregador) {
+        chatSendBtnEntregador.addEventListener('click', enviarMensagemEntregador);
+    }
+    if (chatInputEntregador) {
+        chatInputEntregador.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                enviarMensagemEntregador();
+            }
+        });
+    }
+
+    // Exibir mensagens quando a página carregar
+    exibirMensagensCliente();
+    exibirMensagensRestaurante();
+    exibirMensagensEntregador();
 });

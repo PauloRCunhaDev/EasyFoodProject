@@ -180,3 +180,127 @@ h1 {
 #form-adicionar-item button:hover {
     background-color: #1420b8;
 }
+
+/* Estilos para o Chat */
+.chat-container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex: 1;
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+}
+
+.chat-message {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+.chat-message.cliente {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    text-align: right;
+}
+
+.chat-message.restaurante {
+    background-color: #28a745;
+    color: white;
+    align-self: flex-start;
+    margin-right: auto;
+    text-align: left;
+}
+
+.chat-message.entregador {
+    background-color: #fd7e14;
+    color: white;
+    align-self: flex-start;
+    margin-right: auto;
+    text-align: left;
+}
+
+.chat-message-header {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.chat-message-content {
+    font-size: 14px;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.chat-select {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    min-width: 150px;
+}
+
+.chat-select:focus {
+    border-color: #1d2eea;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+    outline: none;
+}
+
+.chat-input:focus {
+    border-color: #1d2eea;
+}
+
+.chat-send-btn {
+    background-color: #1d2eea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.chat-send-btn:hover {
+    background-color: #1420b8;
+}
+
+.chat-send-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.chat-empty {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 50px;
+}

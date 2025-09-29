@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
             itensExistentes.push(novoItem);
             itensPorRestaurante[nomeRestaurante] = itensExistentes;
 
-            alert(`Item "${nomeItem}" adicionado com sucesso!`);
+            alert(`Item "${nomeItem}" adicionado na lista com sucesso!`);
             document.getElementById('novo-nome-item').value = '';
             document.getElementById('novo-preco-item').value = '';
         };

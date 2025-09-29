@@ -435,6 +435,9 @@ document.addEventListener('DOMContentLoaded', function () {
             alert(`Item "${nomeItem}" adicionado à lista para adicionar ao menu!`);
             document.getElementById('novo-nome-item').value = '';
             document.getElementById('novo-preco-item').value = '';
+            
+            // Atualiza automaticamente a aba "Ver Cardápio" se ela já foi pesquisada
+            atualizarCardapioSeVisivel(nomeRestaurante);
         };
     });
 });
@@ -937,9 +940,33 @@ function adicionarItensAoMenu(nomeRestaurante) {
     
     alert(`${itensPendentesRestaurante.length} item(ns) adicionado(s) ao menu com sucesso!`);
     
-    // Recarrega a visualização do cardápio
-    const btnBuscarCardapio = document.getElementById('search-button-cardapio');
-    if (btnBuscarCardapio) {
-        btnBuscarCardapio.click();
+    // Atualiza automaticamente a visualização do cardápio
+    atualizarCardapioSeVisivel(nomeRestaurante);
+}
+
+// Função para atualizar automaticamente a aba "Ver Cardápio" se ela já foi pesquisada
+function atualizarCardapioSeVisivel(nomeRestaurante) {
+    const resultadoCardapio = document.getElementById('resultado-cardapio');
+    const nomeRestauranteCardapio = document.getElementById('nome-restaurante-cardapio');
+    
+    // Verifica se a aba "Ver Cardápio" está sendo exibida e se é o mesmo restaurante
+    if (resultadoCardapio && 
+        resultadoCardapio.style.display === 'block' && 
+        nomeRestauranteCardapio && 
+        nomeRestauranteCardapio.textContent.toLowerCase().includes(nomeRestaurante.toLowerCase())) {
+        
+        // Simula uma nova busca para atualizar o cardápio
+        const inputCardapio = document.getElementById('search-input-cardapio');
+        const btnBuscarCardapio = document.getElementById('search-button-cardapio');
+        
+        if (inputCardapio && btnBuscarCardapio) {
+            // Preenche o campo com o nome do restaurante e executa a busca
+            const restauranteFormatado = nomeRestaurante.split(' ').map(palavra => 
+                palavra.charAt(0).toUpperCase() + palavra.slice(1)
+            ).join(' ');
+            
+            inputCardapio.value = restauranteFormatado;
+            btnBuscarCardapio.click();
+        }
     }
 }
